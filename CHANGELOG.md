@@ -3,6 +3,13 @@
 Each release has a section headed by its tag. The release workflow publishes that section as the
 release notes and refuses to run without it, so write it before running the workflow.
 
+## Unreleased
+
+- `ddpjoc_encoder` and `dthd_encoder` on Windows: a zero-fill in DEE that AMD Zen 3 runs about
+  45 times slower than Intel is replaced on every run, with the same result. Before, both
+  encoders were 2.5 to 4 times slower there. `DDPJOC_ZERO_FILL_ORIGINAL=1` and
+  `DTHD_ZERO_FILL_ORIGINAL=1` keep DEE's own code.
+
 ## v0.2.0
 
 - A native `--data-rate` for `ddp_encoder` and `ddpjoc_encoder` is now handled as `--bitrate`:

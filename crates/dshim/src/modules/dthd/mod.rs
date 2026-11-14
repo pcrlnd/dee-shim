@@ -1,6 +1,7 @@
 //! Modules targeting dee_dthd_encoder (Dolby TrueHD / MLP). The macOS 6.7 x86_64 code also runs
 //! in the Linux ELF port of that tool; the Windows PE build has its own profile.
 
+use super::common::apply_patch;
 use crate::site::Resolver;
 use std::io::Write;
 
@@ -21,6 +22,10 @@ pub mod smoothing;
 /// compose and rate are independent (an authoring gate, the full job redirect, the
 /// capture-and-mutate composer, and the input rates a target opens).
 pub fn run_all(res: &Resolver, log: &mut dyn Write) {
+    // On every run; only the Windows profile has the site.
+    if !crate::levers().dthd.zero_fill_original {
+        apply_patch(res, "dthd", "dthd.perf.zero_fill", log);
+    }
     smoothing::install(res, log);
     let keep_quiet = passthrough::install(res, log);
     audio::install(res, keep_quiet, log);

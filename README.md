@@ -78,6 +78,10 @@ Every tool also takes raw levers (`--set NAME=VALUE`) and prints the command it 
 (`--dry-run`). DEE's own `-e` sub-options, such as the DRC profiles, keep working under the mode
 a layout picks (see [Layouts and modes](#layouts-and-modes)).
 
+On Windows, `ddpjoc_encoder` and `dthd_encoder` run faster on AMD Zen CPUs: dee_shim replaces a
+slow zero-fill in DEE on every run. `--set DDPJOC_ZERO_FILL_ORIGINAL=1` (`DTHD_ZERO_FILL_ORIGINAL=1`
+for `dthd_encoder`) keeps DEE's own code, for comparing.
+
 `dee_shim <tool> --help` explains every switch and lever. `dee_shim ddp_encoder --list` and
 `dee_shim ddpjoc_encoder --list` print the layouts, their input order and the accepted data rates;
 `dee_shim dthd_encoder --list` prints the TrueHD layouts slot by slot.

@@ -12,6 +12,15 @@ pub static PROFILE: Profile = Profile {
 
 static SITES: &[Site] = &[
     Site {
+        name: "dthd.perf.zero_fill",
+        va: 0x14043836c,
+        kind: Kind::Patch {
+            new: "49 8b 50 18 49 89 57 10 49 89 47 18 48 8b f0 48 8b f8 31 c0 b9 00 00 0c 00 f3 48 ab 48 8b c6 48 8d b6 a0 ff 5f 00 0f 1f 84 00 00 00 00 00 0f 1f 40 00",
+        },
+        expect: "49 8b 50 18 48 8d 78 60 0f 11 00 48 8b f0 b9 f4 ff 0b 00 0f 11 40 10 49 89 57 10 0f 11 40 20 49 89 47 18 0f 11 40 30 0f 11 40 40 0f 11 40 50 f3 48 a5",
+        note: "Zero-fill of a 6 MiB array of 96-byte elements: MSVC clears the first 96 bytes and smears them forward with an overlapping rep movsq, which AMD Zen runs about 45 times slower than a plain fill. Replaced by rep stosq; registers and memory end as before.",
+    },
+    Site {
         name: "dthd.reader.open",
         va: 0x140443A80,
         kind: Kind::Hook { steal: 12 },

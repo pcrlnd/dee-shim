@@ -36,6 +36,7 @@ pub const KEYS: &[&str] = &[
     "DDPJOC_OAMD_EXT_PRECISION",
     "DDPJOC_OAMD_UPDATE_TIMES",
     "DDPJOC_RATE_GATE_OFF",
+    "DDPJOC_ZERO_FILL_ORIGINAL",
     // dee_dthd_encoder
     "DTHD_OAMD_EXACT_POSITIONS",
     "DTHD_OAMD_EXACT_SIZES",
@@ -59,6 +60,7 @@ pub const KEYS: &[&str] = &[
     "DTHD_TARGET",
     "DTHD_COMPOSE",
     "DTHD_LAYOUT",
+    "DTHD_ZERO_FILL_ORIGINAL",
 ];
 
 /// A closed set of names, each parsed from and written as one string.
@@ -238,6 +240,8 @@ pub struct Ddpjoc {
     pub oamd_update_times: Option<bool>,
     /// Remove the Atmos data-rate policy gate.
     pub rate_gate_off: bool,
+    /// Keep DEE's own zero-fill code instead of the faster one (Windows build).
+    pub zero_fill_original: bool,
 }
 
 impl Ddpjoc {
@@ -315,6 +319,8 @@ pub struct Dthd {
     pub compose: Option<String>,
     /// Presentation layouts, `[TIER=]SPEC` entries joined by `;` (dshim_profiles::dthd_layouts).
     pub layout: Option<String>,
+    /// Keep DEE's own zero-fill code instead of the faster one (Windows build).
+    pub zero_fill_original: bool,
 }
 
 impl Dthd {
@@ -461,6 +467,7 @@ impl Levers {
             "DDPJOC_OAMD_EXT_PRECISION" => j.ext_precision = Some(switch(key, v)?),
             "DDPJOC_OAMD_UPDATE_TIMES" => j.oamd_update_times = Some(switch(key, v)?),
             "DDPJOC_RATE_GATE_OFF" => j.rate_gate_off = flag(key, v)?,
+            "DDPJOC_ZERO_FILL_ORIGINAL" => j.zero_fill_original = flag(key, v)?,
             "DTHD_OAMD_UPDATE_TIMES" => t.oamd_update_times = Some(switch(key, v)?),
             "DTHD_NOISE_SHAPING" => t.noise_shaping = Some(switch(key, v)?),
             "DTHD_APODISE" => t.apodise = Some(switch(key, v)?),
@@ -474,6 +481,7 @@ impl Levers {
             "DTHD_TARGET" => t.target = Some(Target::parse(key, v)?),
             "DTHD_COMPOSE" => t.compose = Some(v.to_string()),
             "DTHD_LAYOUT" => t.layout = Some(v.to_string()),
+            "DTHD_ZERO_FILL_ORIGINAL" => t.zero_fill_original = flag(key, v)?,
             _ => {
                 let oamd = if let Some(rest) = key.strip_prefix("DDPJOC_") {
                     Some((&mut j.oamd, rest))
@@ -536,6 +544,7 @@ impl Levers {
         put("DDPJOC_OAMD_EXT_PRECISION", sw(j.ext_precision));
         put("DDPJOC_OAMD_UPDATE_TIMES", sw(j.oamd_update_times));
         put("DDPJOC_RATE_GATE_OFF", fl(j.rate_gate_off));
+        put("DDPJOC_ZERO_FILL_ORIGINAL", fl(j.zero_fill_original));
         for (n, s) in t.oamd.clone().fields() {
             put(oamd_key("DTHD", n), sw(*s));
         }
@@ -552,6 +561,7 @@ impl Levers {
         put("DTHD_TARGET", t.target.map(|v| v.name().to_string()));
         put("DTHD_COMPOSE", t.compose.clone());
         put("DTHD_LAYOUT", t.layout.clone());
+        put("DTHD_ZERO_FILL_ORIGINAL", fl(t.zero_fill_original));
         out
     }
 
@@ -637,7 +647,11 @@ mod tests {
                     "DDP_CORE_TYPE" => "pliix",
                     "DDPJOC_LAYER" => "7.1",
                     "DDPJOC_CORE" => "eac3",
-                    "DDP_LFE_ROUTE" | "DDP_EMDF_OFF" | "DDPJOC_RATE_GATE_OFF" => "1",
+                    "DDP_LFE_ROUTE"
+                    | "DDP_EMDF_OFF"
+                    | "DDPJOC_RATE_GATE_OFF"
+                    | "DDPJOC_ZERO_FILL_ORIGINAL"
+                    | "DTHD_ZERO_FILL_ORIGINAL" => "1",
                     "DTHD_DRC" => "film_light,atmos=none",
                     "DTHD_MLL" => "/x/job.mll",
                     "DTHD_TARGET" => "dvd-a",

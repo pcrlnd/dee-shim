@@ -34,3 +34,25 @@ pub static ALL: &[&Profile] = &[
 pub fn by_ident(key: &str) -> Option<&'static Profile> {
     ALL.iter().copied().find(|p| p.ident.key() == key)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn patch_sites_keep_their_length() {
+        for p in ALL {
+            for s in p.sites {
+                if let Kind::Patch { new } = s.kind {
+                    assert_eq!(
+                        hex(new).len(),
+                        hex(s.expect).len(),
+                        "{} {}: new and expect differ in length",
+                        p.label(),
+                        s.name
+                    );
+                }
+            }
+        }
+    }
+}

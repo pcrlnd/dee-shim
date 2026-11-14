@@ -149,7 +149,12 @@ OBJECT METADATA, DRC AND PHASE-90
   --oamd-as-is codes an already prepared master's object metadata as it is. DRC profiles are DEE's own -e sub-options (drc_profile, drc_profile_line,
   drc_profile_rf) and keep working under the mode a layout picks; none still writes overload
   protection. ddpjoc has no phase-90 sub-option: --phase90, or ddp's
-  surround_90deg_phase_shift=0 given in -e, turns the filter off through dee_shim.";
+  surround_90deg_phase_shift=0 given in -e, turns the filter off through dee_shim.
+
+PERFORMANCE
+  On Windows, dee_shim replaces a slow zero-fill in DEE (an overlapping rep movsq over a 6 MiB
+  array, about 45 times slower on AMD Zen CPUs) with a plain rep stosq, on every run and with
+  the same result. DDPJOC_ZERO_FILL_ORIGINAL=1 (--set) keeps DEE's own code, for comparing.";
 
 pub const DTHD_HELP: &str = "\
 Encode Dolby TrueHD with Atmos (dee_dthd_encoder).
@@ -212,7 +217,12 @@ SAMPLE RATE
         --loudness-management skip:dialnorm=-24
   DEE apodises 96 kHz input (and no other rate), a filter that changes the coded samples;
   --apodise off turns it off, so 96 kHz decodes sample for sample, and --apodise on applies it
-  at 88.2, 176.4 and 192 kHz too (DEE ignores it at 44.1 and 48 kHz).";
+  at 88.2, 176.4 and 192 kHz too (DEE ignores it at 44.1 and 48 kHz).
+
+PERFORMANCE
+  On Windows, dee_shim replaces a slow zero-fill in DEE (an overlapping rep movsq over a 6 MiB
+  array, about 45 times slower on AMD Zen CPUs) with a plain rep stosq, on every run and with
+  the same result. DTHD_ZERO_FILL_ORIGINAL=1 (--set) keeps DEE's own code, for comparing.";
 
 pub const DTHD_KEEP_QUIET: &str = "\
 When the objects fit, keep quiet ones in the clusterer

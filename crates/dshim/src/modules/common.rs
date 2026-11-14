@@ -1,6 +1,7 @@
 //! Helpers shared by modules.
 
 use crate::site::{Resolved, Resolver};
+use dshim_profiles::{hex, Kind};
 use std::io::Write;
 
 /// Resolve and byte-check every site of a coupled-lever feature before anything is written. If
@@ -28,4 +29,19 @@ pub fn require_all(
         }
     }
     out
+}
+
+/// Write a Patch site's `new` bytes at its resolved, byte-checked address; a site the profile
+/// lacks is skipped.
+pub fn apply_patch(res: &Resolver, tool: &str, name: &str, log: &mut dyn Write) {
+    let Some(r) = res.site(name, log) else {
+        return;
+    };
+    if let Kind::Patch { new } = r.kind {
+        if crate::write_code(r.addr, &hex(new)) {
+            lok!(log, tool, "patch {name} @ {:#x} ({new})", r.addr);
+        } else {
+            lerr!(log, tool, "patch {name} write failed");
+        }
+    }
 }
